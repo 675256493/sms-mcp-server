@@ -1,7 +1,7 @@
 {
     "name": "phone-carrier-detector",
     "version": "1.0.0",
-    "description": "MCP server for detecting Chinese mobile phone carriers",
+    "description": "MCP server for detecting Chinese mobile phone carriers and locations",
     "author": "dahuangbaojian",
     "license": "MIT",
     "repository": {
@@ -19,10 +19,11 @@
         "detection",
         "china",
         "mobile",
-        "telecom"
+        "telecom",
+        "location"
     ],
     "engines": {
-        "node": ">=18.0.0"
+        "python": ">=3.8"
     },
     "mcpServers": {
         "phone-carrier-detector": {
@@ -35,35 +36,52 @@
     },
     "features": [
         "Chinese mobile carrier detection",
+        "Phone number location detection",
         "Batch phone number processing",
-        "Virtual carrier support",
-        "Number type classification",
+        "Real-time database lookup",
         "Format validation"
     ],
     "supportedCarriers": [
         "China Mobile",
         "China Unicom",
         "China Telecom",
-        "Virtual Carrier"
+        "China Broadcasting",
+        "China Tietong"
     ],
     "examples": [
         {
-            "description": "Detect single phone number carrier",
-            "input": "13812345678",
-            "output": "China Mobile"
+            "description": "Detect single phone number carrier and location",
+            "input": {
+                "phone_number": "13812345678"
+            },
+            "output": {
+                "success": true,
+                "carrier": "China Mobile",
+                "province": "江苏",
+                "city": "连云港"
+            }
         },
         {
             "description": "Batch detect multiple numbers",
-            "input": [
-                "13812345678",
-                "18612345678",
-                "13312345678"
-            ],
-            "output": [
-                "China Mobile",
-                "China Unicom",
-                "China Telecom"
-            ]
+            "input": {
+                "phone_numbers": [
+                    "13812345678",
+                    "18687654321",
+                    "13312345678"
+                ]
+            },
+            "output": {
+                "success": true,
+                "total": 3,
+                "results": [
+                    {
+                        "success": true,
+                        "carrier": "China Mobile",
+                        "province": "江苏",
+                        "city": "连云港"
+                    }
+                ]
+            }
         }
     ]
 }

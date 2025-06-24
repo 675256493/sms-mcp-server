@@ -1,13 +1,14 @@
 {
     "name": "phone-carrier-detector",
     "version": "1.0.0",
-    "description": "MCP server for detecting Chinese mobile phone carriers",
+    "description": "MCP server for detecting Chinese mobile phone carriers and locations",
     "main": "mcp_server.py",
     "scripts": {
         "start": "python mcp_server.py",
-        "test": "python -m pytest tests/",
-        "lint": "flake8 .",
-        "format": "black ."
+        "test": "python tests/run_tests.py",
+        "test:unit": "python tests/run_tests.py --unit",
+        "test:integration": "python tests/run_tests.py --integration",
+        "parse-data": "python parse_phone_data.py"
     },
     "keywords": [
         "mcp",
@@ -16,7 +17,8 @@
         "detection",
         "china",
         "mobile",
-        "telecom"
+        "telecom",
+        "location"
     ],
     "author": "dahuangbaojian",
     "license": "MIT",
@@ -29,7 +31,7 @@
     },
     "homepage": "https://github.com/dahuangbaojian/sms-mcp-server#readme",
     "engines": {
-        "node": ">=18.0.0"
+        "python": ">=3.8"
     },
     "mcpServers": {
         "phone-carrier-detector": {

@@ -1,291 +1,285 @@
 #!/usr/bin/env python3
 """
-MCP Server for Phone Carrier Detection
+标准的 MCP Server for Phone Carrier Detection
 """
 
 import asyncio
 import json
-import logging
 import re
 import sys
-from typing import Any, Dict, List, Optional, Sequence
+from typing import Any, Dict
 
-from mcp.server import Server
-from mcp.server.models import InitializationOptions
-from mcp.server.stdio import stdio_server
-from mcp.types import (
-    CallToolRequest,
-    CallToolResult,
-    ListToolsRequest,
-    ListToolsResult,
-    Tool,
-    TextContent,
-    ImageContent,
-    EmbeddedResource,
-    LoggingLevel,
-)
 
-# 配置日志
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
+# 加载手机号数据库
+def load_phone_database():
+    """加载手机号数据库"""
+    try:
+        with open("data/phone_database.json", "r", encoding="utf-8") as f:
+            return json.load(f)
+    except FileNotFoundError:
+        print("警告: phone_database.json 文件不存在，使用默认数据库")
+        return {}
 
-# 创建MCP server实例
-server = Server("phone-carrier-detector")
 
-# 运营商数据库
-CARRIER_DATABASE = {
-    # 中国移动
-    "134": "China Mobile",
-    "135": "China Mobile",
-    "136": "China Mobile",
-    "137": "China Mobile",
-    "138": "China Mobile",
-    "139": "China Mobile",
-    "147": "China Mobile",
-    "150": "China Mobile",
-    "151": "China Mobile",
-    "152": "China Mobile",
-    "157": "China Mobile",
-    "158": "China Mobile",
-    "159": "China Mobile",
-    "172": "China Mobile",
-    "178": "China Mobile",
-    "182": "China Mobile",
-    "183": "China Mobile",
-    "184": "China Mobile",
-    "187": "China Mobile",
-    "188": "China Mobile",
-    "198": "China Mobile",
-    # 中国联通
-    "130": "China Unicom",
-    "131": "China Unicom",
-    "132": "China Unicom",
-    "145": "China Unicom",
-    "146": "China Unicom",
-    "155": "China Unicom",
-    "156": "China Unicom",
-    "166": "China Unicom",
-    "167": "China Unicom",
-    "175": "China Unicom",
-    "176": "China Unicom",
-    "185": "China Unicom",
-    "186": "China Unicom",
-    # 中国电信
-    "133": "China Telecom",
-    "149": "China Telecom",
-    "153": "China Telecom",
-    "173": "China Telecom",
-    "177": "China Telecom",
-    "180": "China Telecom",
-    "181": "China Telecom",
-    "189": "China Telecom",
-    "199": "China Telecom",
-    # 虚拟运营商
-    "170": "Virtual Carrier",
-    "171": "Virtual Carrier",
-    "174": "Virtual Carrier",
-}
+# 手机号数据库
+PHONE_DATABASE = load_phone_database()
 
 
 def detect_carrier(phone_number: str) -> Dict[str, Any]:
-    """
-    检测手机号码的运营商信息
-
-    Args:
-        phone_number: 手机号码
-
-    Returns:
-        包含运营商信息的字典
-    """
-    # 清理号码，只保留数字
-    clean_number = re.sub(r"\D", "", phone_number)
-
-    # 验证号码长度
-    if len(clean_number) != 11:
+    """检测手机号运营商和归属地"""
+    # 验证手机号格式
+    if not re.match(r"^1[3-9]\d{9}$", phone_number):
         return {
-            "phone_number": phone_number,
-            "clean_number": clean_number,
-            "carrier": "Unknown Carrier",
-            "error": "Invalid phone number length",
-            "message": "Phone number must be 11 digits",
-            "is_valid": False,
+            "success": False,
+            "error": "Invalid phone number format. Must be 11 digits starting with 1.",
         }
 
-    # 验证号码格式
-    if not clean_number.startswith("1"):
+    # 提取前缀（前7位）
+    prefix = phone_number[:7]
+
+    # 查找数据库
+    if prefix in PHONE_DATABASE:
+        info = PHONE_DATABASE[prefix]
         return {
+            "success": True,
             "phone_number": phone_number,
-            "clean_number": clean_number,
-            "carrier": "Unknown Carrier",
-            "error": "Invalid phone number format",
-            "message": "Phone number must start with '1'",
-            "is_valid": False,
+            "carrier": info["carrier"],
+            "carrier_cn": info["carrier_cn"],
+            "province": info["province"],
+            "city": info["city"],
+            "prefix": prefix,
         }
-
-    # 获取前三位作为运营商前缀
-    prefix = clean_number[:3]
-
-    # 查找运营商
-    carrier = CARRIER_DATABASE.get(prefix, "Unknown Carrier")
-
-    # 确定号码类型
-    if prefix in ["130", "131", "132", "133", "134", "135", "136", "137", "138", "139"]:
-        number_type = "GSM"
-    elif prefix in ["145", "146", "147", "148", "149"]:
-        number_type = "Data Card"
-    elif prefix in ["150", "151", "152", "153", "155", "156", "157", "158", "159"]:
-        number_type = "GSM"
-    elif prefix in ["166", "167", "168"]:
-        number_type = "GSM"
-    elif prefix in ["170", "171", "172", "173", "174", "175", "176", "177", "178"]:
-        number_type = "Virtual"
-    elif prefix in [
-        "180",
-        "181",
-        "182",
-        "183",
-        "184",
-        "185",
-        "186",
-        "187",
-        "188",
-        "189",
-    ]:
-        number_type = "GSM"
-    elif prefix in ["198", "199"]:
-        number_type = "GSM"
     else:
-        number_type = "Unknown"
-
-    return {
-        "phone_number": phone_number,
-        "clean_number": clean_number,
-        "carrier": carrier,
-        "number_type": number_type,
-        "prefix": prefix,
-        "is_valid": True,
-    }
+        return {
+            "success": False,
+            "error": f"Phone number prefix {prefix} not found in database",
+        }
 
 
-@server.list_tools()
-async def handle_list_tools() -> ListToolsResult:
-    """列出可用的工具"""
-    return ListToolsResult(
-        tools=[
-            Tool(
-                name="detect_carrier",
-                description="检测手机号码的运营商信息，支持中国三大运营商（移动、联通、电信）和虚拟运营商的识别",
-                inputSchema={
-                    "type": "object",
-                    "properties": {
-                        "phone_number": {
-                            "type": "string",
-                            "description": "要检测的手机号码，支持带格式的号码如 138-1234-5678 或纯数字 13812345678",
-                        }
-                    },
-                    "required": ["phone_number"],
-                },
-            ),
-            Tool(
-                name="batch_detect_carriers",
-                description="批量检测多个手机号码的运营商信息",
-                inputSchema={
-                    "type": "object",
-                    "properties": {
-                        "phone_numbers": {
-                            "type": "array",
-                            "items": {"type": "string"},
-                            "description": "要检测的手机号码列表",
-                        }
-                    },
-                    "required": ["phone_numbers"],
-                },
-            ),
-        ]
-    )
+def batch_detect_carriers(phone_numbers: list) -> Dict[str, Any]:
+    """批量检测手机号运营商和归属地"""
+    if not isinstance(phone_numbers, list):
+        return {"success": False, "error": "Input must be a list of phone numbers"}
 
+    if len(phone_numbers) > 100:
+        return {
+            "success": False,
+            "error": "Maximum 100 phone numbers allowed per batch",
+        }
 
-@server.call_tool()
-async def handle_call_tool(name: str, arguments: Dict[str, Any]) -> CallToolResult:
-    """处理工具调用"""
-
-    if name == "detect_carrier":
-        phone_number = arguments.get("phone_number")
-        if not phone_number:
-            return CallToolResult(
-                content=[TextContent(type="text", text="错误：请提供手机号码")]
+    results = []
+    for phone in phone_numbers:
+        if not isinstance(phone, str):
+            results.append(
+                {"success": False, "error": f"Invalid phone number type: {type(phone)}"}
             )
+        else:
+            results.append(detect_carrier(phone))
 
-        result = detect_carrier(phone_number)
+    return {"success": True, "results": results, "total": len(results)}
 
-        if "error" in result:
-            return CallToolResult(
-                content=[
-                    TextContent(
-                        type="text",
-                        text=f"检测失败：{result['error']} - {result['message']}",
-                    )
+
+class MCPServer:
+    """MCP Server 实现"""
+
+    def __init__(self):
+        self.request_id = 1
+
+    def get_capabilities(self) -> Dict[str, Any]:
+        """获取服务器能力"""
+        return {
+            "jsonrpc": "2.0",
+            "id": self.request_id,
+            "result": {
+                "protocolVersion": "2024-11-05",
+                "capabilities": {"tools": {}},
+                "serverInfo": {"name": "phone-carrier-detector", "version": "1.0.0"},
+            },
+        }
+
+    def list_tools(self) -> Dict[str, Any]:
+        """列出可用工具"""
+        return {
+            "jsonrpc": "2.0",
+            "id": self.request_id,
+            "result": {
+                "tools": [
+                    {
+                        "name": "detect_carrier",
+                        "description": "Detect carrier and location for a single phone number",
+                        "inputSchema": {
+                            "type": "object",
+                            "properties": {
+                                "phone_number": {
+                                    "type": "string",
+                                    "description": "Phone number to detect (11 digits)",
+                                }
+                            },
+                            "required": ["phone_number"],
+                        },
+                    },
+                    {
+                        "name": "batch_detect_carriers",
+                        "description": "Detect carriers and locations for multiple phone numbers",
+                        "inputSchema": {
+                            "type": "object",
+                            "properties": {
+                                "phone_numbers": {
+                                    "type": "array",
+                                    "items": {"type": "string"},
+                                    "description": "List of phone numbers to detect (max 100)",
+                                }
+                            },
+                            "required": ["phone_numbers"],
+                        },
+                    },
                 ]
-            )
+            },
+        }
 
-        # 格式化输出
-        output = f"""📱 手机号码运营商检测结果
+    def call_tool(self, name: str, arguments: Dict[str, Any]) -> Dict[str, Any]:
+        """调用工具"""
+        try:
+            if name == "detect_carrier":
+                phone_number = arguments.get("phone_number")
+                if not phone_number:
+                    return {
+                        "jsonrpc": "2.0",
+                        "id": self.request_id,
+                        "error": {
+                            "code": -32602,
+                            "message": "Missing required parameter: phone_number",
+                        },
+                    }
+                result = detect_carrier(phone_number)
+                return {
+                    "jsonrpc": "2.0",
+                    "id": self.request_id,
+                    "result": {
+                        "content": [
+                            {
+                                "type": "text",
+                                "text": json.dumps(
+                                    result, ensure_ascii=False, indent=2
+                                ),
+                            }
+                        ]
+                    },
+                }
 
-📞 号码：{result['phone_number']}
-🏢 运营商：{result['carrier']}
-📋 号码类型：{result['number_type']}
-🔢 前缀：{result['prefix']}
-✅ 状态：有效号码
+            elif name == "batch_detect_carriers":
+                phone_numbers = arguments.get("phone_numbers")
+                if not phone_numbers:
+                    return {
+                        "jsonrpc": "2.0",
+                        "id": self.request_id,
+                        "error": {
+                            "code": -32602,
+                            "message": "Missing required parameter: phone_numbers",
+                        },
+                    }
+                result = batch_detect_carriers(phone_numbers)
+                return {
+                    "jsonrpc": "2.0",
+                    "id": self.request_id,
+                    "result": {
+                        "content": [
+                            {
+                                "type": "text",
+                                "text": json.dumps(
+                                    result, ensure_ascii=False, indent=2
+                                ),
+                            }
+                        ]
+                    },
+                }
 
----
-*数据来源：中国三大运营商号码段数据库*"""
-
-        return CallToolResult(content=[TextContent(type="text", text=output)])
-
-    elif name == "batch_detect_carriers":
-        phone_numbers = arguments.get("phone_numbers", [])
-        if not phone_numbers:
-            return CallToolResult(
-                content=[TextContent(type="text", text="错误：请提供手机号码列表")]
-            )
-
-        results = []
-        for phone in phone_numbers:
-            result = detect_carrier(phone)
-            results.append(result)
-
-        # 格式化批量输出
-        output = "📱 批量手机号码运营商检测结果\n\n"
-
-        for i, result in enumerate(results, 1):
-            if "error" in result:
-                output += f"{i}. 📞 {result.get('phone_number', 'N/A')} - ❌ {result['error']}\n"
             else:
-                output += f"{i}. 📞 {result['phone_number']} - 🏢 {result['carrier']} ({result['number_type']})\n"
+                return {
+                    "jsonrpc": "2.0",
+                    "id": self.request_id,
+                    "error": {"code": -32601, "message": f"Method not found: {name}"},
+                }
 
-        output += "\n---\n*数据来源：中国三大运营商号码段数据库*"
+        except Exception as e:
+            return {
+                "jsonrpc": "2.0",
+                "id": self.request_id,
+                "error": {"code": -32603, "message": f"Internal error: {str(e)}"},
+            }
 
-        return CallToolResult(content=[TextContent(type="text", text=output)])
+    async def handle_request(self, request: Dict[str, Any]) -> Dict[str, Any]:
+        """处理请求"""
+        self.request_id = request.get("id", 1)
+        method = request.get("method")
+        params = request.get("params", {})
 
-    else:
-        return CallToolResult(
-            content=[TextContent(type="text", text=f"未知工具：{name}")]
-        )
+        if method == "initialize":
+            return self.get_capabilities()
+        elif method == "tools/list":
+            return self.list_tools()
+        elif method == "tools/call":
+            name = params.get("name")
+            arguments = params.get("arguments", {})
+            return self.call_tool(name, arguments)
+        else:
+            return {
+                "jsonrpc": "2.0",
+                "id": self.request_id,
+                "error": {"code": -32601, "message": f"Method not found: {method}"},
+            }
 
 
 async def main():
     """主函数"""
-    # 运行MCP server
-    async with stdio_server() as (read_stream, write_stream):
-        await server.run(
-            read_stream,
-            write_stream,
-            InitializationOptions(
-                server_name="phone-carrier-detector",
-                server_version="1.0.0",
-                capabilities={},
-            ),
-        )
+    server = MCPServer()
+
+    # 使用标准输入输出
+    reader = asyncio.StreamReader()
+    protocol = asyncio.StreamReaderProtocol(reader)
+    await asyncio.get_event_loop().connect_read_pipe(lambda: protocol, sys.stdin)
+
+    try:
+        while True:
+            # 读取一行
+            line = await reader.readline()
+            if not line:
+                break
+
+            try:
+                # 解析 JSON
+                request = json.loads(line.decode().strip())
+
+                # 处理请求
+                response = await server.handle_request(request)
+
+                # 发送响应
+                response_line = json.dumps(response) + "\n"
+                sys.stdout.buffer.write(response_line.encode())
+                sys.stdout.buffer.flush()
+
+            except json.JSONDecodeError as e:
+                error_response = {
+                    "jsonrpc": "2.0",
+                    "id": None,
+                    "error": {"code": -32700, "message": f"Parse error: {str(e)}"},
+                }
+                error_line = json.dumps(error_response) + "\n"
+                sys.stdout.buffer.write(error_line.encode())
+                sys.stdout.buffer.flush()
+
+            except Exception as e:
+                error_response = {
+                    "jsonrpc": "2.0",
+                    "id": None,
+                    "error": {"code": -32603, "message": f"Internal error: {str(e)}"},
+                }
+                error_line = json.dumps(error_response) + "\n"
+                sys.stdout.buffer.write(error_line.encode())
+                sys.stdout.buffer.flush()
+
+    except KeyboardInterrupt:
+        pass
 
 
 if __name__ == "__main__":

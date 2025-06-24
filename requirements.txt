@@ -1,5 +1,4 @@
-mcp>=1.0.0
-fastapi>=0.110.0
-uvicorn>=0.27.1
-pydantic>=2.6.3
-python-dotenv>=1.0.1 
+# 标准库依赖，无需额外安装
+# 本项目使用Python标准库实现MCP协议
+# 如需测试，可安装pytest
+pytest>=7.0.0 
