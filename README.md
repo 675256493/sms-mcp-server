@@ -223,7 +223,7 @@ python mcp_server.py
 
 1. 查看 [Issues](https://github.com/dahuangbaojian/sms-mcp-server/issues)
 2. 创建新的 Issue
-3. 发送邮件到 dahuangbaojian@example.com
+3. 发送邮件到 huangjian@ztinfo.cn
 
 ---
 
