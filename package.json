@@ -1,0 +1,43 @@
+{
+    "name": "phone-carrier-detector",
+    "version": "1.0.0",
+    "description": "MCP server for detecting Chinese mobile phone carriers",
+    "main": "mcp_server.py",
+    "scripts": {
+        "start": "python mcp_server.py",
+        "test": "python -m pytest tests/",
+        "lint": "flake8 .",
+        "format": "black ."
+    },
+    "keywords": [
+        "mcp",
+        "phone",
+        "carrier",
+        "detection",
+        "china",
+        "mobile",
+        "telecom"
+    ],
+    "author": "Your Name",
+    "license": "MIT",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/yourusername/phone-carrier-detector.git"
+    },
+    "bugs": {
+        "url": "https://github.com/yourusername/phone-carrier-detector/issues"
+    },
+    "homepage": "https://github.com/yourusername/phone-carrier-detector#readme",
+    "engines": {
+        "node": ">=18.0.0"
+    },
+    "mcpServers": {
+        "phone-carrier-detector": {
+            "command": "python",
+            "args": [
+                "mcp_server.py"
+            ],
+            "env": {}
+        }
+    }
+}

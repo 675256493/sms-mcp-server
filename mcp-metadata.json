@@ -1,0 +1,69 @@
+{
+    "name": "phone-carrier-detector",
+    "version": "1.0.0",
+    "description": "MCP server for detecting Chinese mobile phone carriers",
+    "author": "Your Name",
+    "license": "MIT",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/yourusername/phone-carrier-detector.git"
+    },
+    "homepage": "https://github.com/yourusername/phone-carrier-detector#readme",
+    "bugs": {
+        "url": "https://github.com/yourusername/phone-carrier-detector/issues"
+    },
+    "keywords": [
+        "mcp",
+        "phone",
+        "carrier",
+        "detection",
+        "china",
+        "mobile",
+        "telecom"
+    ],
+    "engines": {
+        "node": ">=18.0.0"
+    },
+    "mcpServers": {
+        "phone-carrier-detector": {
+            "command": "python",
+            "args": [
+                "mcp_server.py"
+            ],
+            "env": {}
+        }
+    },
+    "features": [
+        "Chinese mobile carrier detection",
+        "Batch phone number processing",
+        "Virtual carrier support",
+        "Number type classification",
+        "Format validation"
+    ],
+    "supportedCarriers": [
+        "China Mobile",
+        "China Unicom",
+        "China Telecom",
+        "Virtual Carrier"
+    ],
+    "examples": [
+        {
+            "description": "Detect single phone number carrier",
+            "input": "13812345678",
+            "output": "China Mobile"
+        },
+        {
+            "description": "Batch detect multiple numbers",
+            "input": [
+                "13812345678",
+                "18612345678",
+                "13312345678"
+            ],
+            "output": [
+                "China Mobile",
+                "China Unicom",
+                "China Telecom"
+            ]
+        }
+    ]
+}
