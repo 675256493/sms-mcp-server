@@ -30,8 +30,8 @@ npm install phone-carrier-detector
 ### 方法2: 从源码安装
 
 ```bash
-git clone https://github.com/yourusername/phone-carrier-detector.git
-cd phone-carrier-detector
+git clone https://github.com/dahuangbaojian/sms-mcp-server.git
+cd sms-mcp-server
 pip install -r requirements.txt
 ```
 
@@ -152,7 +152,7 @@ python mcp_server.py
 
 如果你遇到任何问题或有建议，请：
 
-1. 查看 [Issues](https://github.com/yourusername/phone-carrier-detector/issues)
+1. 查看 [Issues](https://github.com/dahuangbaojian/sms-mcp-server/issues)
 2. 创建新的 Issue
 3. 发送邮件到 support@example.com
 

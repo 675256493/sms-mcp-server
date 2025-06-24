@@ -2,15 +2,15 @@
     "name": "phone-carrier-detector",
     "version": "1.0.0",
     "description": "MCP server for detecting Chinese mobile phone carriers",
-    "author": "Your Name",
+    "author": "dahuangbaojian",
     "license": "MIT",
     "repository": {
         "type": "git",
-        "url": "https://github.com/yourusername/phone-carrier-detector.git"
+        "url": "https://github.com/dahuangbaojian/sms-mcp-server.git"
     },
-    "homepage": "https://github.com/yourusername/phone-carrier-detector#readme",
+    "homepage": "https://github.com/dahuangbaojian/sms-mcp-server#readme",
     "bugs": {
-        "url": "https://github.com/yourusername/phone-carrier-detector/issues"
+        "url": "https://github.com/dahuangbaojian/sms-mcp-server/issues"
     },
     "keywords": [
         "mcp",

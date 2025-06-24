@@ -49,10 +49,10 @@ dev = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/yourusername/phone-carrier-detector"
-Documentation = "https://github.com/yourusername/phone-carrier-detector#readme"
-Repository = "https://github.com/yourusername/phone-carrier-detector.git"
-"Bug Tracker" = "https://github.com/yourusername/phone-carrier-detector/issues"
+Homepage = "https://github.com/dahuangbaojian/sms-mcp-server"
+Documentation = "https://github.com/dahuangbaojian/sms-mcp-server#readme"
+Repository = "https://github.com/dahuangbaojian/sms-mcp-server.git"
+"Bug Tracker" = "https://github.com/dahuangbaojian/sms-mcp-server/issues"
 
 [project.scripts]
 phone-carrier-detector = "mcp_server:main"

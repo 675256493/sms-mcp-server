@@ -19,10 +19,26 @@ class TestCarrierDetection:
     def test_china_mobile_numbers(self):
         """测试中国移动号码"""
         mobile_numbers = [
+            "13412345678",
+            "13512345678",
+            "13612345678",
+            "13712345678",
             "13812345678",
-            "13987654321",
+            "13912345678",
+            "14712345678",
             "15012345678",
-            "18612345678",
+            "15112345678",
+            "15212345678",
+            "15712345678",
+            "15812345678",
+            "15912345678",
+            "17212345678",
+            "17812345678",
+            "18212345678",
+            "18312345678",
+            "18412345678",
+            "18712345678",
+            "18812345678",
             "19812345678",
         ]
 
@@ -33,7 +49,21 @@ class TestCarrierDetection:
 
     def test_china_unicom_numbers(self):
         """测试中国联通号码"""
-        unicom_numbers = ["13012345678", "13112345678", "15512345678", "18612345678"]
+        unicom_numbers = [
+            "13012345678",
+            "13112345678",
+            "13212345678",
+            "14512345678",
+            "14612345678",
+            "15512345678",
+            "15612345678",
+            "16612345678",
+            "16712345678",
+            "17512345678",
+            "17612345678",
+            "18512345678",
+            "18612345678",
+        ]
 
         for number in unicom_numbers:
             result = detect_carrier(number)
@@ -42,7 +72,17 @@ class TestCarrierDetection:
 
     def test_china_telecom_numbers(self):
         """测试中国电信号码"""
-        telecom_numbers = ["13312345678", "15312345678", "18012345678", "18912345678"]
+        telecom_numbers = [
+            "13312345678",
+            "14912345678",
+            "15312345678",
+            "17312345678",
+            "17712345678",
+            "18012345678",
+            "18112345678",
+            "18912345678",
+            "19912345678",
+        ]
 
         for number in telecom_numbers:
             result = detect_carrier(number)
@@ -51,7 +91,7 @@ class TestCarrierDetection:
 
     def test_virtual_carrier_numbers(self):
         """测试虚拟运营商号码"""
-        virtual_numbers = ["17012345678", "17112345678", "17512345678", "17812345678"]
+        virtual_numbers = ["17012345678", "17112345678", "17412345678"]
 
         for number in virtual_numbers:
             result = detect_carrier(number)
@@ -101,7 +141,7 @@ class TestCarrierDetection:
     def test_unknown_carrier(self):
         """测试未知运营商"""
         unknown_numbers = [
-            "19912345678",  # 假设的未知号段
+            "99912345678",  # 假设的未知号段
         ]
 
         for number in unknown_numbers:

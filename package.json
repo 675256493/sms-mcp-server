@@ -18,16 +18,16 @@
         "mobile",
         "telecom"
     ],
-    "author": "Your Name",
+    "author": "dahuangbaojian",
     "license": "MIT",
     "repository": {
         "type": "git",
-        "url": "https://github.com/yourusername/phone-carrier-detector.git"
+        "url": "https://github.com/dahuangbaojian/sms-mcp-server.git"
     },
     "bugs": {
-        "url": "https://github.com/yourusername/phone-carrier-detector/issues"
+        "url": "https://github.com/dahuangbaojian/sms-mcp-server/issues"
     },
-    "homepage": "https://github.com/yourusername/phone-carrier-detector#readme",
+    "homepage": "https://github.com/dahuangbaojian/sms-mcp-server#readme",
     "engines": {
         "node": ">=18.0.0"
     },
