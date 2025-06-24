@@ -279,8 +279,19 @@ async def main():
                 sys.stdout.buffer.flush()
 
     except KeyboardInterrupt:
+        # 优雅处理 Ctrl+C
+        pass
+    except asyncio.CancelledError:
+        # 优雅处理取消操作
+        pass
+    except Exception as e:
+        # 其他异常，静默处理
         pass
 
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    try:
+        asyncio.run(main())
+    except KeyboardInterrupt:
+        # 确保 Ctrl+C 不会显示异常
+        pass
