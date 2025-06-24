@@ -103,15 +103,23 @@ def detect_carrier(phone_number: str) -> Dict[str, Any]:
     # 验证号码长度
     if len(clean_number) != 11:
         return {
+            "phone_number": phone_number,
+            "clean_number": clean_number,
+            "carrier": "Unknown Carrier",
             "error": "Invalid phone number length",
             "message": "Phone number must be 11 digits",
+            "is_valid": False,
         }
 
     # 验证号码格式
     if not clean_number.startswith("1"):
         return {
+            "phone_number": phone_number,
+            "clean_number": clean_number,
+            "carrier": "Unknown Carrier",
             "error": "Invalid phone number format",
             "message": "Phone number must start with '1'",
+            "is_valid": False,
         }
 
     # 获取前三位作为运营商前缀
@@ -275,10 +283,7 @@ async def main():
             InitializationOptions(
                 server_name="phone-carrier-detector",
                 server_version="1.0.0",
-                capabilities=server.get_capabilities(
-                    notification_options=None,
-                    experimental_capabilities=None,
-                ),
+                capabilities={},
             ),
         )
 
